@@ -664,7 +664,7 @@ footer{background:var(--ink);padding:52px 48px 28px;}
    5. خدي الـ ID من الرابط (الجزء بين /d/ و /edit)
    6. حطيه في SHEET_ID أدناه
 ══════════════════════════════════════════════════════ */
-const SHEET_ID = "https://docs.google.com/spreadsheets/d/1ZiaqxMrsUCWPN1mNktwhSC3R_OXo6cLukHCuiR7AF70/edit?usp=sharing"; // ← ضعي ID الشيت هنا
+const SHEET_ID = "1ZiaqxMrsUCWPN1mNktwhSC3R_OXo6cLukHCuiR7AF70";
 
 let USERS_CACHE = null;
 
@@ -683,7 +683,12 @@ async function fetchUsers() {
     const res  = await fetch(url);
     const text = await res.text();
     const json = JSON.parse(text.replace(/.*google\.visualization\.Query\.setResponse\(/, '').replace(/\);?\s*$/, ''));
-    const rows = json.table.rows.slice(1); // skip header row
+    const allRows = json.table.rows;
+    // skip header row (first row contains "email","pass",etc.)
+    const rows = allRows.filter(r => {
+      const first = (r.c?.[0]?.v || '').toString().trim().toLowerCase();
+      return first && first !== 'email';
+    });
     USERS_CACHE = rows.map(r => {
       const c = r.c;
       const raw = (c[3]?.v || '').toString().trim();
